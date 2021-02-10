@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="cbs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/test/cbs/reggie-dl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/test/cbs/jini-core.jar!/" />
+      <root url="jar://$PROJECT_DIR$/test/cbs/ChatClient.jar!/" />
+      <root url="jar://$PROJECT_DIR$/test/cbs/jini-ext.jar!/" />
+      <root url="jar://$PROJECT_DIR$/test/cbs/ChatServer.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

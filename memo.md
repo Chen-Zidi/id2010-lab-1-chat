@@ -1,10 +1,12 @@
 ### Memo
 
 ## to implement:
-2 Enable all clients connected to the service to see whenever a client
-joins or leaves the chat. Add a user command to the client that
-allows the user to list users currently joined to the service. If
-the client uses the .name command, this should be seen by all
+2 
+Enable all clients connected to the service to see whenever a client
+joins or leaves the chat. 
+Add a user command to the client that allows the user to 
+list users currently joined to the service.
+If the client uses the .name command, this should be seen by all
 connected clients.
 
 +

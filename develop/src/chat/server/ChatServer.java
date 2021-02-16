@@ -22,8 +22,11 @@ import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 // Jini
 
@@ -75,6 +78,8 @@ public class ChatServer
   protected Vector<RemoteEventListener> clients =
     new Vector<RemoteEventListener> ();
 
+  protected ConcurrentHashMap<RemoteEventListener,String> clientsNameList = new ConcurrentHashMap<> ();
+
   /**
    * The printed name of this server instance.
    */
@@ -93,7 +98,7 @@ public class ChatServer
 
   /**
    * Creates a new ChatServer.
-   * @param idName The identifying name of this server instance.
+   * @param name The identifying name of this server instance.
    */
   public ChatServer (String name)
     throws
@@ -182,13 +187,18 @@ public class ChatServer
   /**
    * Adds a registration to the list of clients currently connected to
    * this ChatServer instance.
-   * @param rel  The RemoteEventListener implementation to add.
+   * @param rel  The RemoteEventListener
+   * @param name the name of the client
    */
-  protected void addClient (RemoteEventListener rel) {
+  protected void addClient (RemoteEventListener rel, String name) {
     synchronized (clients) {
       clients.add (rel);
+
     }
-    System.out.println ("Added client : " + rel.toString ());
+    synchronized(clientsNameList){
+        clientsNameList.put(rel, name);
+    }
+    System.out.println ("Added client : [" + name + ": " + rel.toString () + "]");
   }
 
   /**
@@ -202,6 +212,21 @@ public class ChatServer
     }
     System.out.println ("Removed client : " + rel.toString ());
   }
+
+    /**
+     * update the name of the client when client using .name command in the client side
+     * @param rel  The RemoteEventListener.
+     * @param name new name of the client.
+     */
+    protected void setClientName (RemoteEventListener rel, String name) {
+        synchronized(clientsNameList){
+            clientsNameList.put(rel, name);
+        }
+
+        System.out.println ("update client name: [" + name + ": " + rel.toString () + "]");
+    }
+
+
 
   /* *** Interface ChatServerInterface *** */
 
@@ -218,11 +243,26 @@ public class ChatServer
     return serverName;
   }
 
-  @Override
-  public void register (RemoteEventListener rel) throws RemoteException
+    @Override
+    public HashMap<String, String> getActiveClients () throws RemoteException {
+        //System.out.println(clients.toString());
+       // return clientsNameList;
+        HashMap<String, String> clist = new HashMap<> ();
+        clientsNameList.forEach( (k,v) -> clist.put(k.toString(),v));
+        return clist;
+    }
+
+    @Override
+    public void updateClientName(RemoteEventListener rel, String name) throws RemoteException {
+        setClientName(rel, name);
+    }
+
+
+    @Override
+  public void register (RemoteEventListener rel, String name) throws RemoteException
   {
     if (rel != null) {
-      addClient (rel);
+      addClient (rel, name);
     }
   }
 

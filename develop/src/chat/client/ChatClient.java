@@ -18,7 +18,9 @@ import java.rmi.server.UnicastRemoteObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 // Jini
 
@@ -283,9 +285,9 @@ public class ChatClient
 	  for (ServiceItem sit : servers) { // each known server
 	    for (Entry e : sit.attributeSets) { // each attribute of the server
 	      if (e instanceof Name) {
-		String svname = ((Name) e).name;
-		nsmap.put(svname, sit);
-		break;		// out of for each attribute entry
+            String svname = ((Name) e).name;
+            nsmap.put(svname, sit);
+            break;		// out of for each attribute entry
 	      }
 	    }
 	  }
@@ -326,7 +328,8 @@ public class ChatClient
 	System.out.flush();
 
 	try {
-	  nextServer.register(this);
+	    //default name comes from the system here
+	  nextServer.register(this, System.getProperty ("user.name"));
 	  System.out.println("ok]");
 	}
 	catch (RemoteException rex) {
@@ -360,7 +363,7 @@ public class ChatClient
    *
    * @param newName  The user's name.
    */
-  public void setName (String newName) {
+  public void setName (String newName) throws RemoteException {
 
     myName = newName;
 
@@ -374,6 +377,11 @@ public class ChatClient
     if (myName == null) {
       myName = System.getProperty ("user.name");
     }
+
+    if(myServer != null){
+        myServer.updateClientName(this, newName);
+    }
+
   }
   
   /**
@@ -461,6 +469,7 @@ public class ChatClient
   protected String [] cmdHelp = {
     "Commands (can be abbreviated):",
     ".list              List the currently known chat servers",
+    ".all clients       List all active clients",
     ".purge             As list, but also forget non-responding servers",
     ".name <name>       Set the username presented by the chat client",
     ".c                 Connect to the default server",
@@ -508,13 +517,24 @@ public class ChatClient
 
 
     /**
-     * This method implements the '.all active clients' user command.
+     * This method implements the '.all clients' user command.
      *
      *
      */
-    public void allActiveClients () {
+    public void allActiveClients () throws RemoteException {
+        System.out.println("start finding...");
+        if(myServer == null){
+            System.out.println("Not connect to any server yet.");
+            return;
+        }
+        HashMap<String, String> clientsList = myServer.getActiveClients();
+        System.out.println("[all active clients list] ");
+        Iterator<String> itr = clientsList.keySet().iterator();
 
-
+        while (itr.hasNext()) {
+            String key = itr.next();
+            System.out.println(clientsList.get(key) + ": " + key);
+        }
     }
 
 
@@ -523,7 +543,7 @@ public class ChatClient
    * parsed and dispatched methods that either alter the client or sends
    * the text to the ChatServer (when connected).
    */
-  public void readLoop () {
+  public void readLoop () throws RemoteException {
     boolean halted = false;
     BufferedReader d = new BufferedReader(new InputStreamReader(System.in));
     
@@ -593,8 +613,9 @@ public class ChatClient
 	}
 	else if ("help".startsWith (verb)) {
 	  showHelp (argv);
-	}else if("all active clients".startsWith(verb)){
-        System.out.println("list all active clients");
+	}
+	else if("all clients".startsWith(verb)){
+        //System.out.println("list all active clients");
         allActiveClients();
     }
 	else {

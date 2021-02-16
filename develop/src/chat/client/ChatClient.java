@@ -364,7 +364,7 @@ public class ChatClient
    * @param newName  The user's name.
    */
   public void setName (String newName) throws RemoteException {
-
+    String oldName = myName;
     myName = newName;
 
     if (myName != null) {
@@ -379,7 +379,7 @@ public class ChatClient
     }
 
     if(myServer != null){
-        myServer.updateClientName(this, newName);
+        myServer.updateClientName(this, newName, oldName);
     }
 
   }

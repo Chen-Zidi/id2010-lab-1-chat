@@ -253,8 +253,9 @@ public class ChatServer
     }
 
     @Override
-    public void updateClientName(RemoteEventListener rel, String name) throws RemoteException {
+    public void updateClientName(RemoteEventListener rel, String name, String oldName) throws RemoteException {
         setClientName(rel, name);
+        say("server: " + oldName + " updates the name to " + name);
     }
 
 
@@ -264,6 +265,7 @@ public class ChatServer
     if (rel != null) {
       addClient (rel, name);
     }
+    say("server: " + name + " joins the chat!");
   }
 
   @Override
@@ -272,6 +274,7 @@ public class ChatServer
     if (rel != null) {
       removeClient (rel);
     }
+    say("server: " + clientsNameList.get(rel) + " leaves the chat!");
   }
 
   /* *** Internal code *** */

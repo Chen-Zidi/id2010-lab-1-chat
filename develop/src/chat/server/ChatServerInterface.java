@@ -45,7 +45,7 @@ public interface ChatServerInterface
   /**
    * update the client's name.
    */
-  public void updateClientName(RemoteEventListener rel, String name) throws java.rmi.RemoteException;
+  public void updateClientName(RemoteEventListener rel, String name, String oldName) throws java.rmi.RemoteException;
 
 
   /**

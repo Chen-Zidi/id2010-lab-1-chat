@@ -66,4 +66,14 @@ public interface ChatServerInterface
    */
   public void unregister (RemoteEventListener rel)
     throws java.rmi.RemoteException;
+
+  /**
+   * add to the byte length of the messages that the client has sent
+   * @param rel An object that implements net.jini.core.event.RemoteEvent
+   *            interface. This should be the same object as was originally
+   *            used to register.
+   * @throws java.rmi.RemoteException
+   */
+  public void addTextLen(RemoteEventListener rel, int length)
+    throws java.rmi.RemoteException;
 }

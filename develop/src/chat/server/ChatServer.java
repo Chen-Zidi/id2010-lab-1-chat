@@ -19,13 +19,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Vector;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 // Jini
@@ -79,6 +79,8 @@ public class ChatServer
     new Vector<RemoteEventListener> ();
 
   protected ConcurrentHashMap<RemoteEventListener,String> clientsNameList = new ConcurrentHashMap<> ();
+  protected ConcurrentHashMap<RemoteEventListener, Integer> clientToMsgLen = new ConcurrentHashMap<>();
+  protected ConcurrentHashMap<RemoteEventListener, Instant> clientToStartTime = new ConcurrentHashMap<>();
 
   /**
    * The printed name of this server instance.
@@ -168,6 +170,7 @@ public class ChatServer
     }
     msgCount++;
     System.out.println ("MSG#" + msgCount + ":" + msg);
+
     // Wake up the distribution thread.
     wakeUp ();
   }
@@ -198,6 +201,9 @@ public class ChatServer
     synchronized(clientsNameList){
         clientsNameList.put(rel, name);
     }
+    synchronized (clientToMsgLen){
+      clientToMsgLen.put(rel, 0);
+    }
     System.out.println ("Added client : [" + name + ": " + rel.toString () + "]");
   }
 
@@ -207,10 +213,11 @@ public class ChatServer
    * @param rel  The RemoteEventListener implementation to remove.
    */
   protected void removeClient (RemoteEventListener rel) {
+    String clientName = clientsNameList.get(rel);
+    System.out.println ("Removed client : " + clientName);
     synchronized (clients) {
       clients.remove (rel);
     }
-    System.out.println ("Removed client : " + rel.toString ());
   }
 
     /**
@@ -265,6 +272,8 @@ public class ChatServer
     if (rel != null) {
       addClient (rel, name);
     }
+    // record the current time
+    clientToStartTime.put(rel, Instant.now());
     say("server: " + name + " joins the chat!");
   }
 
@@ -275,6 +284,18 @@ public class ChatServer
       removeClient (rel);
     }
     say("server: " + clientsNameList.get(rel) + " leaves the chat!");
+    Long timeDiff = Duration.between( clientToStartTime.get(rel), Instant.now()).getSeconds();
+    // here do not say(broadcast), only server println
+    System.out.println(clientsNameList.get(rel) + " has conversation session of "
+            + timeDiff + " seconds");
+    System.out.println(clientsNameList.get(rel) + " has sent messages of " +
+            clientToMsgLen.get(rel) + " bytes during the session");
+  }
+
+  @Override
+  public void addTextLen(RemoteEventListener rel, int length) throws RemoteException
+  {
+    clientToMsgLen.put(rel, clientToMsgLen.get(rel) + length);
   }
 
   /* *** Internal code *** */

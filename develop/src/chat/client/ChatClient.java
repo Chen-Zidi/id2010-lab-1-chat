@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -392,7 +393,10 @@ public class ChatClient
   public void sendToChat (String text) {
     if (myServer != null) {
       try {
-	myServer.say (text);
+        myServer.say (text);
+        byte[] b = text.getBytes(StandardCharsets.UTF_8);
+        // the length also includes the client name and a ": " for each sent message
+        myServer.addTextLen(this, b.length);
       }
       catch (RemoteException rex) {
 	System.out.println ("[Sending to server failed]");

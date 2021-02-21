@@ -36,6 +36,7 @@ public interface ChatServerInterface
   public String getName () throws java.rmi.RemoteException;
 
   /**
+   * added
    * Returns the name of active clients in the server.
    * @return The name of active clients in the server.
    */
@@ -43,12 +44,14 @@ public interface ChatServerInterface
 
 
   /**
+   * added
    * update the client's name.
    */
   public void updateClientName(RemoteEventListener rel, String name, String oldName) throws java.rmi.RemoteException;
 
 
   /**
+   * edited
    * Used by ChatClient instances to register themselves as receivers of
    * remote notifications.
    * @param rel An object that implements net.jini.core.event.RemoteEvent
@@ -58,6 +61,7 @@ public interface ChatServerInterface
     throws java.rmi.RemoteException;
 
   /**
+   *
    * Used by ChatClient instances to unregister themselves as receivers of
    * remote notifications.
    * @param rel An object that implements net.jini.core.event.RemoteEvent
@@ -68,6 +72,7 @@ public interface ChatServerInterface
     throws java.rmi.RemoteException;
 
   /**
+   * added
    * add to the byte length of the messages that the client has sent
    * @param rel An object that implements net.jini.core.event.RemoteEvent
    *            interface. This should be the same object as was originally

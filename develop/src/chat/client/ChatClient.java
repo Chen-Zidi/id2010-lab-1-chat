@@ -251,6 +251,8 @@ public class ChatClient
   }
 
   /**
+   * edited
+   *
    * This method implements the '.connect' user command. If a
    * servername pattern is supplied, the known chat services are
    * scanned for names in which the pattern is a prefix. If a null or
@@ -329,8 +331,8 @@ public class ChatClient
 	System.out.flush();
 
 	try {
-	    //default name comes from the system here
-	  nextServer.register(this, System.getProperty ("user.name"));
+	    //use my name to connect
+	  nextServer.register(this, myName);
 	  System.out.println("ok]");
 	}
 	catch (RemoteException rex) {
@@ -357,6 +359,7 @@ public class ChatClient
 
 
   /**
+   * edited
    * This method implements the '.name' user command. It sets the name
    * the user has choosen for herself on the chat. If the name is null
    * or the empty string, the &quot;user.name&quot; system property is
@@ -379,6 +382,7 @@ public class ChatClient
       myName = System.getProperty ("user.name");
     }
 
+    //if there is a server connection, then report the name change
     if(myServer != null){
         myServer.updateClientName(this, newName, oldName);
     }
@@ -386,6 +390,8 @@ public class ChatClient
   }
   
   /**
+   * edited
+   *
    * This method implements the send command which is implicit in the
    * command interpreter (the input line does not start with a period).
    * @param text  The text to send to the currently connected server.
@@ -521,9 +527,8 @@ public class ChatClient
 
 
     /**
+     * added
      * This method implements the '.all clients' user command.
-     *
-     *
      */
     public void allActiveClients () throws RemoteException {
         System.out.println("start finding...");

@@ -78,6 +78,7 @@ public class ChatServer
   protected Vector<RemoteEventListener> clients =
     new Vector<RemoteEventListener> ();
 
+  //added
   protected ConcurrentHashMap<RemoteEventListener,String> clientsNameList = new ConcurrentHashMap<> ();
   protected ConcurrentHashMap<RemoteEventListener, Integer> clientToMsgLen = new ConcurrentHashMap<>();
   protected ConcurrentHashMap<RemoteEventListener, Instant> clientToStartTime = new ConcurrentHashMap<>();
@@ -188,6 +189,8 @@ public class ChatServer
   }
 
   /**
+   * edited
+   *
    * Adds a registration to the list of clients currently connected to
    * this ChatServer instance.
    * @param rel  The RemoteEventListener
@@ -198,9 +201,11 @@ public class ChatServer
       clients.add (rel);
 
     }
+    //add to name list
     synchronized(clientsNameList){
         clientsNameList.put(rel, name);
     }
+    //add to message length list
     synchronized (clientToMsgLen){
       clientToMsgLen.put(rel, 0);
     }
@@ -208,19 +213,24 @@ public class ChatServer
   }
 
   /**
+   * edited
    * Removes a registration from the list of clients currently
    * connected to this ChatServer instance.
    * @param rel  The RemoteEventListener implementation to remove.
    */
   protected void removeClient (RemoteEventListener rel) {
+    //use client name here
     String clientName = clientsNameList.get(rel);
     System.out.println ("Removed client : " + clientName);
     synchronized (clients) {
       clients.remove (rel);
     }
+
   }
 
     /**
+     * added
+     *
      * update the name of the client when client using .name command in the client side
      * @param rel  The RemoteEventListener.
      * @param name new name of the client.
@@ -250,22 +260,23 @@ public class ChatServer
     return serverName;
   }
 
+  //added
     @Override
     public HashMap<String, String> getActiveClients () throws RemoteException {
-        //System.out.println(clients.toString());
-       // return clientsNameList;
+
         HashMap<String, String> clist = new HashMap<> ();
         clientsNameList.forEach( (k,v) -> clist.put(k.toString(),v));
         return clist;
     }
 
+    //added
     @Override
     public void updateClientName(RemoteEventListener rel, String name, String oldName) throws RemoteException {
         setClientName(rel, name);
         say("server: " + oldName + " updates the name to " + name);
     }
 
-
+//edited
     @Override
   public void register (RemoteEventListener rel, String name) throws RemoteException
   {
@@ -277,21 +288,32 @@ public class ChatServer
     say("server: " + name + " joins the chat!");
   }
 
+  //edited
   @Override
   public void unregister (RemoteEventListener rel) throws RemoteException
   {
     if (rel != null) {
       removeClient (rel);
     }
+    //broadcast the message
     say("server: " + clientsNameList.get(rel) + " leaves the chat!");
+
+    //calculate the session time
     Long timeDiff = Duration.between( clientToStartTime.get(rel), Instant.now()).getSeconds();
     // here do not say(broadcast), only server println
     System.out.println(clientsNameList.get(rel) + " has conversation session of "
             + timeDiff + " seconds");
     System.out.println(clientsNameList.get(rel) + " has sent messages of " +
             clientToMsgLen.get(rel) + " bytes during the session");
+
+    //clear all lists
+    clientsNameList.remove(rel);
+    clientToStartTime.remove(rel);
+    clientToMsgLen.remove(rel);
   }
 
+  //added
+  //add message length to the client
   @Override
   public void addTextLen(RemoteEventListener rel, int length) throws RemoteException
   {
